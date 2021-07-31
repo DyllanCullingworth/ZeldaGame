@@ -14,34 +14,64 @@ const MOVE_SPEED = 120;
 const SLICER_SPEED = 100;
 const SKELETOR_SPEED = 60;
 
-
+https://imgur.com/
 // Set the root folder for finding images
-loadRoot('https://i.imgur.com/')
+loadRoot('https://i.imgur.com/');
 // Store images on something like IMGUR and link them below ( 48px x 48px);
-loadSprite('link-going-left', '1Xq9biB.png')
-loadSprite('link-going-right', 'yZIb8O2.png')
-loadSprite('link-going-down', 'tVtlP6y.png')
-loadSprite('link-going-up', 'UkV0we0.png')
-loadSprite('left-wall', 'rfDoaa1.png')
-loadSprite('top-wall', 'QA257Bj.png')
-loadSprite('bottom-wall', 'vWJWmvb.png')
-loadSprite('right-wall', 'SmHhgUn.png')
-loadSprite('bottom-left-wall', 'awnTfNC.png')
-loadSprite('bottom-right-wall', '84oyTFy.png')
-loadSprite('top-left-wall', 'xlpUxIm.png')
-loadSprite('top-right-wall', 'z0OmBd1.jpg')
-loadSprite('top-door', 'U9nre4n.png')
-loadSprite('fire-pot', 'I7xSp7w.png')
-loadSprite('left-door', 'okdJNls.png')
-loadSprite('lanterns', 'wiSiY09.png')
-loadSprite('slicer', 'c6JFi5Z.png')
-loadSprite('skeletor', 'Ei1VnX8.png')
-loadSprite('kaboom', 'o9WizfI.png')
-loadSprite('stairs', 'VghkL08.png')
-loadSprite('bg', 'u4DVsx6.png')
+loadSprite('link-going-left', 'wC5TDtK.png');
+loadSprite('link-going-right', 'DVtlQIP.png');
+loadSprite('link-going-down', 'rRSx6eT.png');
+loadSprite('link-going-up', 'JJTxGTC.png');
+
+
+loadSprite('top-left-wall', '3au0D3U.png');
+loadSprite('top-wall', 'UJgz38b.png');
+loadSprite('top-right-wall', 'AVTmn1C.jpg');
+loadSprite('right-wall', '8w2KWFU.png');
+loadSprite('bottom-right-wall', 'fVMAdwe.png');
+loadSprite('bottom-wall', 'Mr152Qh.png');
+loadSprite('bottom-left-wall', 'uBl4QPz.png');
+loadSprite('left-wall', 'S6bTFAe.png');
+
+loadSprite('top-door', 'yoV9FvD.png');
+loadSprite('left-door', '5RHv1To.png');
+loadSprite('stairs', 'jwJFfQk.png');
+loadSprite('sink-hole', 'K2FOTEi.png');
+
+loadSprite('bg', 'bxbkG4V.png');
+loadSprite('grass', 'AVTmn1C.png');
+
+loadSprite('fire-pot', 'd47zzrJ.png');
+loadSprite('lanterns', '3KBXSaT.png');
+
+loadSprite('slicer', 'qf0EPy5.png');
+loadSprite('skeletor', '1wbC3JU.png');
+
+loadSprite('kaboom', 'u84kCQG.png');
+
+
+
+
+// uBl4QPz
+// qf0EPy5
+// jwJFfQk
+// JJTxGTC
+// d47zzrJ
+// UJgz38b
+// sK5gxre
+// K2FOTEi
+// DVtlQIP
+// 5RHv1To
+// 3KBXSaT
+// NdSjd4H
+// bxbkG4V
+// Mr152Qh
+// wC5TDtK
+// yoV9FvD
+// u84kCQG
 
 // create a scene
-scene('game', ({ level, score }) => {
+scene('game', ({ level, score, health }) => {
     //      obj collides with player
     layers(['bg', 'obj', 'ui'], 'obj')
 
@@ -95,8 +125,8 @@ scene('game', ({ level, score }) => {
         '^': [sprite('top-door'), 'next-level'],
         '$': [sprite('stairs'), 'next-level'],
 
-        '*': [sprite('slicer'), 'slicer', 'dangerous', { dir: -1 }],
-        '}': [sprite('skeletor'), 'skeletor', 'dangerous', { dir: -1, timer: 0 }],
+        '*': [sprite('slicer'), 'slicer', 'dangerous', { dir: -1, dmg: 1 }],
+        '}': [sprite('skeletor'), 'skeletor', 'dangerous', { dir: -1, timer: 0, dmg: 2 }],
 
     }
 
@@ -106,22 +136,7 @@ scene('game', ({ level, score }) => {
 
 
 
-    // UI ======
-    const scoreLabel = add([
-        text('0'),
-        pos(400, 450),
-        layer('ui'),
-        {
-            value: score
-        },
-        scale(2),
-    ])
 
-    add([
-        text('level: ' + parseInt(level)),
-        pos(400, 480),
-        scale(2)
-    ])
 
 
 
@@ -129,11 +144,13 @@ scene('game', ({ level, score }) => {
     // Player ======
     const player = add([
         sprite('link-going-right'),
+        health(5),
         pos(5, 190),
         {
             //right by default
-            dir: vec2(1, 0)
-        }
+            dir: vec2(1, 0),
+            immune: false
+        },
     ])
 
     player.action(() => {
@@ -143,13 +160,32 @@ scene('game', ({ level, score }) => {
     player.overlaps('next-level', () => {
         go("game", {
             level: level == maps.length ? 1 : (level + 1), // loop through levels
-            score: scoreLabel.value
+            score: scoreLabel.value,
         })
     })
 
-    player.overlaps('dangerous', () => {
+    player.overlaps('dangerous', (obj) => {
+        player.hurt(obj.dmg);
+    })
+
+    player.on("hurt", () => {
+        healthBar.text = player.hp();
+        immune(player, 1);
+    })
+
+    player.on("death", () => {
         go("lose", { score: scoreLabel.value })
     })
+
+
+    function immune(obj, time) {
+        if (obj.immune == false) {
+            obj.immune = true;
+            wait(time, () => {
+                obj.immune = false;
+            })
+        }
+    }
 
 
     // Player Movement =======
@@ -177,6 +213,8 @@ scene('game', ({ level, score }) => {
         player.dir = vec2(0, 1);
     })
 
+
+
     function spawnKaboom(p) {
         const obj = add([sprite('kaboom'), pos(p), 'kaboom'])
         wait(0.2, () => {
@@ -195,6 +233,60 @@ scene('game', ({ level, score }) => {
         scoreLabel.text = scoreLabel.value;
     })
 
+    function health(hp) {
+        return {
+            // comp id (if not it'll be treated like custom fields on the game object)
+            id: "health",
+            // comp dependencies (will throw if the host object doesn't contain these components)
+            require: [],
+            // custom behaviors
+            hurt(n) {
+                if (!this.immune) {
+                    hp -= n ?? 1;
+                    // trigger custom events
+                    this.trigger("hurt");
+                    if (hp <= 0) {
+                        this.trigger("death");
+                    }
+                }
+
+            },
+            heal(n) {
+                hp += n ?? 1;
+                this.trigger("heal");
+            },
+            hp() {
+                return hp;
+            },
+        };
+    }
+
+
+
+    // UI ======
+    const scoreLabel = add([
+        text('0'),
+        pos(400, 450),
+        layer('ui'),
+        {
+            value: score
+        },
+        scale(2),
+    ])
+
+    add([
+        text('level: ' + parseInt(level)),
+        pos(400, 480),
+        scale(2)
+    ])
+
+
+    const healthBar = add([
+        text('Health:' + player.hp()),
+        pos(0, 450),
+        layer('ui'),
+        scale(2)
+    ])
 
 
 
