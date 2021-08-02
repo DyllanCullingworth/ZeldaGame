@@ -7,11 +7,11 @@ function initialize_level(level) {
         [
             'qww)ww^wwe',
             'a        d',
-            'a      * d',
-            'a    (   d',
-            '%        d',
-            'a    (   d',
-            'a   *    d',
+            'a   *  * d',
+            'a (      d',
+            'a        d',
+            'a (      d',
+            'a   *  * d',
             'a        d',
             'zxx)xx)xxc',
         ],
@@ -25,7 +25,18 @@ function initialize_level(level) {
             ')    }   )',
             'a        d',
             'zxxxxxxxxc',
-        ]
+        ],
+        [
+            'qwwwwwwwwwe',
+            'a         d',
+            ')   } }   )',
+            'a         d',
+            'a     }   d',
+            'a         d',
+            ')     }   )',
+            'a       $ d',
+            'zxxxxxxxxxc',
+        ],
     ]
     map_count = maps.length;
 

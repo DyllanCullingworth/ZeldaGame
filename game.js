@@ -53,7 +53,6 @@ loadSprite('kaboom', 'u84kCQG.png');
 // create a scene
 scene('game', ({ level, score, hp }) => {
 
-
     initialize_level(level);
 
     const playerObjects = initialize_player(level, score, hp);
@@ -75,9 +74,6 @@ scene('game', ({ level, score, hp }) => {
         scoreLabel.value++;
         scoreLabel.text = scoreLabel.value;
     })
-
-
-
 
     // NPC Movement ========
     action('slicer', (s) => {
